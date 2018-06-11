@@ -1,0 +1,35 @@
+{
+  "name": "my-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "gulp",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "wool",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-generator": "^6.26.1",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-traverse": "^6.26.0",
+    "babel-types": "^6.26.0",
+    "chalk": "^2.4.1",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.1",
+    "gulp-changed": "^3.2.0",
+    "gulp-file": "^0.4.0",
+    "gulp-less": "^3.5.0",
+    "gulp-rename": "^1.2.3",
+    "gulp-rollup": "^2.16.2",
+    "rimraf": "^2.6.2",
+    "rollup": "^0.60.2",
+    "rollup-plugin-babel": "^3.0.4"
+  }
+}
