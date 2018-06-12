@@ -14,7 +14,7 @@ gulp.task('less-task', lessTask); //编译样式文件
 gulp.task('rollup-task', rollupTask);  //编译js模块
 gulp.task('copy-file-task', copyFileTask); //拷贝文件
 //gulp.task('babel-task', babelTask); //babel转码
-gulp.task('default', ['less-task', 'copy-file-task', 'rollup-task']);
+gulp.task('default', ['less-task', /* 'copy-file-task', */ 'rollup-task']);
 
 function lessTask(done) {
     gulp.src(['./src/**/*/*.less', './src/*.less'])
@@ -66,11 +66,11 @@ function rollupTask(done) {
                 if (warning.code === 'UNUSED_EXTERNAL_IMPORT') return;
                 if (warning.code === 'UNRESOLVED_IMPORT') { console.log('有不能正确解析的模块'); return };
                 if (warning.code === 'NON_EXISTENT_EXPORT') throw new Error(warning.message);
-                console.warn(warning.message);
+                if (warning.message) console.warn(warning.message);
             }
         }))
         .on('bundle', buildBundle)
-        .on('error', err => console.error(err.stack || err))
+        .on('error', err => { } /* console.error(err.stack || err) */)
         .pipe(changed('./dist'))
         // .pipe(gulp.dest('./dist'))
         .on('finish', done);

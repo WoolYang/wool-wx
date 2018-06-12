@@ -26,17 +26,14 @@ export default class Index extends Page {
     }
 
     render() {
-        const { motto, userInfo, hasUserInfo, canIUse } = this.state;
         return (
             <view class="container test">
                 <view class="userinfo">
-                    {!hasUserInfo && canIUse ? <button open-type="getUserInfo" bindgetuserinfo="getUserInfo">获取头像昵称</button>
-                        :
-                        <block>
-                            <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
-                            <text class="userinfo-nickname">{userInfo.nickName}</text>
-                        </block>
-                    }
+                    <button open-type="getUserInfo" bindgetuserinfo="getUserInfo">获取头像昵称</button>
+                    <block>
+                        <image bindtap="bindViewTap" class="userinfo-avatar" src={userInfo.avatarUrl} mode="cover"></image>
+                        <text class="userinfo-nickname">{userInfo.nickName}</text>
+                    </block>
                 </view>
                 <view class="usermotto">
                     <text class="user-motto">{motto}</text>

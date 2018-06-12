@@ -1,8 +1,4 @@
-const App = {}
-const Page = {}
-const Component = {}
-export {
-    App,
-    Page,
-    Component
-}
+var App = {};
+var Page = {};
+var Component = {};
+export { App, Page, Component };
