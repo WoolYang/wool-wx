@@ -29,7 +29,6 @@ function buildBundle(bundle) {
         }
     })
     //生成新的bundle
-
     generator(mainId, modules, transformedModules, { target, src }, referenced)
     //console.log(transformedModules)
 }

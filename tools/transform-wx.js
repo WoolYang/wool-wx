@@ -94,11 +94,11 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                 const result = path.node.attributes.find(x => x.name.name === 'condition')
                 const condition = generate(result.value, { concise: true }).code; //提取条件中的condition
                 const subResult = path.parent.children.find(x => x.type === 'JSXElement') //提取
-                subResult.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`wx:${path.node.name.name}`), t.StringLiteral(condition))))
+                subResult.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`${path.node.name.name}`), t.StringLiteral(condition))))
                 path.parent.openingElement = ''
             } else if (path.node.name.name === 'else') {
                 const subResult = path.parent.children.find(x => x.type === 'JSXElement') //提取
-                subResult.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`wx:${path.node.name.name}`))))
+                subResult.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`${path.node.name.name}`))))
                 path.parent.openingElement = ''
             }
         },
@@ -110,15 +110,11 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
             }
         },
         JSXExpressionContainer(path) { //jsx容器表达式转义
-            if (path.node.expression.type === 'Identifier') { //普通表达式
-                path.node.expression = t.identifier(
-                    `{${generate(path.node.expression).code}}`
-                )
-            } else if (path.node.expression.type === 'ConditionalExpression') { //条件表达式
+            if (path.node.expression.type === 'ConditionalExpression') { //条件表达式
                 if (path.node.expression.consequent.type === 'JSXElement') {
                     const condition = generate(path.node.expression.test, { concise: true }).code;
-                    path.node.expression.consequent.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`wx:if`), t.StringLiteral(`{${condition}}`))))
-                    path.node.expression.alternate.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`wx:else`))))
+                    path.node.expression.consequent.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`if`), t.StringLiteral(`{${condition}}`))))
+                    path.node.expression.alternate.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`else`))))
                     path.replaceWithMultiple([
                         path.node.expression.consequent,
                         path.node.expression.alternate,
@@ -129,6 +125,10 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                     )
                 }
 
+            } else {
+                path.node.expression = t.identifier(
+                    `{${generate(path.node.expression).code}}`
+                )
             }
         },
         JSXAttribute(path) {
@@ -146,6 +146,8 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
             if (!value) {
                 if (/else/.test(name.name)) return
                 path.node.value = t.stringLiteral('{{true}}')
+            } else if (t.isObjectExpression(value.expression)) {
+                path.node.value = t.stringLiteral(`{${generate(value.expression, { concise: true }).code}}`)
             } else if (t.isTemplateLiteral(value.expression)) {
                 //处理模板语法
                 path.node.value = t.stringLiteral(
@@ -238,11 +240,8 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
             ? null
             : babel.transform(generate(AST).code, {
                 babelrc: false,
-                presets: [
-                    "react"
-                ],
                 plugins: [
-                    "transform-class-properties", "transform-class-properties"
+                    "transform-class-properties", "transform-object-rest-spread"
                 ],
             }).code.replace('"use strict";\n\n', '')
         return output

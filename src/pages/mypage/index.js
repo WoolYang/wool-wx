@@ -45,10 +45,19 @@ export default class Index extends Page {
                         : <button open-type="getUserInfo" bindgetuserinfo="getUserInfo">条件二</button>
                     }
                 </view>
-                <view class="usermotto">
-                    <text class="user-motto">{motto}</text>
-                </view>
+                <view class="user-motto">{motto}</view>
                 <view id={`item-${motto}`}> </view>
+                <checkbox checked={false}> </checkbox>
+                <view if={motto}> </view>
+                <view hidden={flag ? true : false}> Hidden </view>
+                <view> {`${(a + b)} + ${c} + d`}</view>
+                <view if={length > 6}> </view>
+                <view>{"hello" + name}</view>
+                <view>{object.key} {array[0]}</view>
+                <template is="objectCombine" data={{ foo: a, bar: b }}></template>
+                <template is="objectCombine" data={{ foo, bar }}></template>
+                <template is="objectCombine" data={{ ...obj1, ...obj2, e: 5 }}></template>
+                <template is="objectCombine" data={{ ...obj1, ...obj2, a, c: 6 }}></template>
             </view>
         )
     }

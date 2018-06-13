@@ -59,7 +59,7 @@ function rollupTask(done) {
                             "modules": false
                         }]
                     ],
-                    plugins: ["transform-class-properties", "transform-class-properties"]
+                    plugins: ["transform-class-properties", "transform-object-rest-spread"]
                 })
             ],
             onwarn(warning) { //异常处理
