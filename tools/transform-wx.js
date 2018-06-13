@@ -9,6 +9,12 @@ const babel = require('babel-core')
 
 const prettifyXml = require('prettify-xml')
 
+//数组合并，类似python zip
+const zip = arrays => {
+    let shortest = arrays.length == 0 ? [] : arrays.reduce((a, b) => a.length < b.length ? a : b);
+    return shortest.map((_, i) => arrays.map(array => array[i]));
+}
+
 const parse = src => {
     const options = {
         babelrc: false,
@@ -127,6 +133,32 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
         },
         JSXAttribute(path) {
             const { name, value } = path.node
+            //属性key转义
+            if (/if|elif|else|for|key|for-index|for-item/.test(name.name)) {
+                path.node.name.name = `wx:${name.name}`
+            } else if (/^on(\w*)$/.test(name.name)) {
+                path.node.name.name = name.name.replace(/^on(\w*)$/, 'bind$1').toLowerCase()
+            } else {
+                path.node.name.name = name.name
+            }
+            //属性value转义
+            if (value && !value.expression) return
+            if (!value) {
+                if (/else/.test(name.name)) return
+                path.node.value = t.stringLiteral('{{true}}')
+            } else if (t.isTemplateLiteral(value.expression)) {
+                //处理模板语法
+                path.node.value = t.stringLiteral(
+                    zip([
+                        value.expression.quasis.map(x => x.value.raw),
+                        value.expression.expressions.map(x => x.name)
+                    ]).reduce((v, [raw, name]) => {
+                        return !raw && !name ? v : name ? v + `${raw}{{${name}}}` : v + raw
+                    }, '')
+                )
+            } else {
+                path.node.value = t.stringLiteral(`{{${generate(value.expression).code}}}`)
+            }
         }
     }
 

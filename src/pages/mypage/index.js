@@ -48,6 +48,7 @@ export default class Index extends Page {
                 <view class="usermotto">
                     <text class="user-motto">{motto}</text>
                 </view>
+                <view id={`item-${motto}`}> </view>
             </view>
         )
     }
