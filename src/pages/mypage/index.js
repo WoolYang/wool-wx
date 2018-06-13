@@ -41,6 +41,9 @@ export default class Index extends Page {
                             <text class="userinfo-nickname">{userInfo.nickName ? 1 : 2}</text>
                         </block>
                     </else>
+                    {!hasUserInfo && canIUse ? <button open-type="getUserInfo" bindgetuserinfo="getUserInfo">条件一</button>
+                        : <button open-type="getUserInfo" bindgetuserinfo="getUserInfo">条件二</button>
+                    }
                 </view>
                 <view class="usermotto">
                     <text class="user-motto">{motto}</text>
