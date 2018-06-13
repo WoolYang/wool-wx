@@ -83,8 +83,26 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                     t.jSXIdentifier('template')
                 )
             }
+            //过滤条件标签
+            if (path.node.name.name === 'if' || path.node.name.name === 'elif') {
+                const result = path.node.attributes.find(x => x.name.name === 'condition')
+                const condition = generate(result.value, { concise: true }).code; //提取条件中的condition
+                const subResult = path.parent.children.find(x => x.type === 'JSXElement') //提取
+                subResult.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`wx:${path.node.name.name}`), t.StringLiteral(condition))))
+                path.parent.openingElement = ''
+            } else if (path.node.name.name === 'else') {
+                const subResult = path.parent.children.find(x => x.type === 'JSXElement') //提取
+                subResult.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`wx:${path.node.name.name}`))))
+                path.parent.openingElement = ''
+            }
         },
-
+        JSXClosingElement(path) {
+            if (path.node.name.name === 'if' || path.node.name.name === 'elif') {
+                path.parent.closingElement = ''
+            } else if (path.node.name.name === 'else') {
+                path.parent.openingElement = ''
+            }
+        },
         JSXExpressionContainer(path) { //jsx容器表达式转义
             path.node.expression = t.identifier(
                 `{${generate(path.node.expression).code}}`
@@ -123,10 +141,8 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                     )
                     if (!result) return
                     if (result.argument.type === 'JSXElement') {
-                        output.wxml = prettifyXml(
-                            generate(result.argument, { concise: true }).code,
-                            { indent: 2 }
-                        )
+                        const code = generate(result.argument, { concise: true }).code.replace(/\n(\n)*( )*(\n)*\n/g, "\n")
+                        output.wxml = prettifyXml(code, { indent: 4 })
                         path.remove()
                     }
                 } else if (methodName === 'constructor') {
