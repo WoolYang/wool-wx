@@ -94,7 +94,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                 const result = path.node.attributes.find(x => x.name.name === 'condition')
                 const condition = generate(result.value, { concise: true }).code; //提取条件中的condition
                 const subResult = path.parent.children.find(x => x.type === 'JSXElement') //提取
-                subResult.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`${path.node.name.name}`), t.StringLiteral(condition))))
+                subResult.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`${path.node.name.name}`), t.StringLiteral(`{${condition}}`))))
                 path.parent.openingElement = ''
             } else if (path.node.name.name === 'else') {
                 const subResult = path.parent.children.find(x => x.type === 'JSXElement') //提取
@@ -113,7 +113,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
             if (path.node.expression.type === 'ConditionalExpression') { //条件表达式
                 if (path.node.expression.consequent.type === 'JSXElement') {
                     const condition = generate(path.node.expression.test, { concise: true }).code;
-                    path.node.expression.consequent.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`if`), t.StringLiteral(`{${condition}}`))))
+                    path.node.expression.consequent.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`if`), t.StringLiteral(`{{${condition}}}`))))
                     path.node.expression.alternate.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`else`))))
                     path.replaceWithMultiple([
                         path.node.expression.consequent,

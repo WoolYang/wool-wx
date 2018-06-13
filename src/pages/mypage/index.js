@@ -50,7 +50,7 @@ export default class Index extends Page {
                 <checkbox checked={false}> </checkbox>
                 <view if={motto}> </view>
                 <view hidden={flag ? true : false}> Hidden </view>
-                <view> {`${(a + b)} + ${c} + d`}</view>
+                <view> {a + b} + {c} + d}</view>
                 <view if={length > 6}> </view>
                 <view>{"hello" + name}</view>
                 <view>{object.key} {array[0]}</view>
