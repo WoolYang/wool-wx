@@ -19,9 +19,8 @@ const parse = src => {
 }
 
 const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePath }) => {
-    //console.log(id)
-    const Attrs = []
-    const Methods = []
+    const Attrs = [] //收集class 下属性
+    const Methods = [] //收集component组件下方法
     const Properties = {}
     const ImportPages = []
     const ImportComponents = {}
@@ -85,6 +84,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                 )
             }
         },
+
         JSXExpressionContainer(path) { //jsx容器表达式转义
             path.node.expression = t.identifier(
                 `{${generate(path.node.expression).code}}`
@@ -92,48 +92,19 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
         },
         JSXAttribute(path) {
             const { name, value } = path.node
-            console.log(path.node.name.name)
-            path.node.name.name = /if|elif|else|for|key|for-index|for-item/.test(name.name)
-                ? `wx:${name.name}`
-                : /^on(\w*)$/.test(name.name)
-                    ? name.name.replace(/^on(\w*)$/, 'bind$1').toLowerCase()
-                    : name.name
-            if (value && !value.expression) return
-            if (!value) {
-                if (/else/.test(name.name)) return
-                path.node.value = t.stringLiteral('{{true}}')
-            } else if (t.isTemplateLiteral(value.expression)) {
-                path.node.value = t.stringLiteral(
-                    zip(
-                        value.expression.quasis.map(x => x.value.raw),
-                        value.expression.expressions.map(x => x.name)
-                    ).reduce((v, [raw, name]) => {
-                        return !raw && !name ? v : name ? v + `${raw}{{${name}}}` : v + raw
-                    }, '')
-                )
-            } else if (t.isObjectExpression(value.expression)) {
-                const newValue = generate(value.expression, { concise: true }).code
-                path.node.value = t.stringLiteral(`{${newValue}}`)
-            } else if (/^bind/.test(path.node.name.name)) {
-                const newValue = generate(value.expression).code
-                path.node.value = t.stringLiteral(newValue.replace('this.', ''))
-            } else {
-                const newValue = generate(value.expression).code
-                path.node.value = t.stringLiteral(`{{${newValue}}}`)
-            }
         }
     }
 
     const visitor = {
         CallExpression(path) { //调用表达式转义
             if (
-                t.isMemberExpression(path.node.callee) &&
+                path.get('callee').isMemberExpression() &&
                 path.node.callee.property.name === 'setState'
             ) {
                 path.node.callee.property.name = 'setData'
             }
         },
-        ClassMethod: { //属性方法访问器
+        ClassMethod: { //属性方法访问器转义
             enter(path) {
                 const methodName = path.node.key.name
 
@@ -142,28 +113,6 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                         console.error('render 方法只能 return !')
                     }
                     return
-                } else if (/created|attached|ready|moved|detached/.test(methodName)) {
-
-                    if (!isComponent()) return
-                    const fn = t.objectProperty(
-                        t.identifier(methodName),
-                        t.functionExpression(null, path.node.params, path.node.body, path.node.generator, path.node.async)
-                    )
-                    Attrs.push(fn)
-                } else if (isComponent()) {
-                    const fn = t.objectProperty(
-                        t.identifier(methodName),
-                        t.functionExpression(null, path.node.params, path.node.body, path.node.generator, path.node.async)
-                    )
-                    Methods.push(fn)
-                    // } else if (t.isClassMethod(path.node, { async: true })) {
-                    // console.log('method', methodName, path.node)
-                } else {
-                    const fn = t.objectProperty(
-                        t.identifier(methodName),
-                        t.functionExpression(null, path.node.params, path.node.body, path.node.generator, path.node.async)
-                    )
-                    Attrs.push(fn)
                 }
             },
             exit(path) {
@@ -180,9 +129,41 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                         )
                         path.remove()
                     }
+                } else if (methodName === 'constructor') {
+                    const data = path.node.body.body.find(
+                        x => x.expression.left && x.expression.left.property.name === 'state'
+                    )
+                    Attrs.push(t.objectProperty(t.identifier('data'), data.expression.right))
+                } else {
+                    const fn = t.objectProperty(
+                        t.identifier(methodName),
+                        t.functionExpression(null, path.node.params, path.node.body, path.node.generator, path.node.async)
+                    )
+                    Attrs.push(fn)
+                }
+            }
+        },
+        ExportDefaultDeclaration: { //导出表达式转义
+            enter(path) {
+                const { node: { declaration } } = path
+                const { superClass } = declaration
+                if (superClass && /App|Page|Component/.test(superClass.name)) { //转义页面类型
+                    output.type = superClass.name.toLowerCase()
                 }
             },
-        },
+            exit(path) {
+                const { node: { declaration } } = path
+                const { superClass } = declaration
+
+                if (superClass && /App|Page|Component/.test(superClass.name)) { //替换super结构体
+                    path.replaceWith(
+                        t.CallExpression(t.identifier(superClass.name), [
+                            t.objectExpression(Attrs)
+                        ])
+                    )
+                }
+            }
+        }
     }
     //代码转换为AST语法树
     try {
