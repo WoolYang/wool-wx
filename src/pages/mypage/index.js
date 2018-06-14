@@ -98,6 +98,7 @@ export default class Index extends Page {
                 </block>
                 <view id="tapTest" data-hi="WeChat" onTap={tapName}> Click me! </view>
                 <tem {...item} />
+                <Header>out</Header>
             </view>
         )
     }

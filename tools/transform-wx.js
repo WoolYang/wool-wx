@@ -30,10 +30,10 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
     const ImportPages = []     //收集导入页面
     const ImportComponents = {} //收集导入组件
     const ImportTemplates = {} //收集导入模板
-    const Properties = {}
+    const Properties = {} //收集组件属性/默认值
     const ImportSources = []
-    const ComponentRelations = {}
-    const JSONAttrs = {}
+    const ComponentRelations = {} //收集组件关联
+    const JSONAttrs = {} //收集json
     const output = { type: 'local_module' }
 
     const isTemplate = function () {
@@ -177,6 +177,28 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                 path.node.callee.property.name = 'setData'
             }
         },
+        ClassProperty(path) {
+            //处理自定义组件默认值
+            if (isComponent() && /defaultProps/.test(path.node.key.name)) {
+                path.node.value.properties.forEach(property => {
+                    const value = property.value
+                    const key = property.key.name
+                    Properties[key] = Properties[key] || {}
+                    Properties[key].value = value
+                })
+            } else if (isComponent() && /propTypes/.test(path.node.key.name)) {
+                path.node.value.properties.forEach(property => {
+                    const value = property.value
+                    const key = property.key.name
+                    Properties[key] = Properties[key] || {}
+                    if (value.object.name === 'PropTypes') {
+                        const type = propTypes[value.property.name]
+                        if (!type) return
+                        Properties[key].type = t.identifier(type)
+                    }
+                })
+            }
+        },
         ClassMethod: { //属性方法访问器转义
             enter(path) {
                 const methodName = path.node.key.name
@@ -205,6 +227,19 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                         x => x.expression.left && x.expression.left.property.name === 'state'
                     )
                     Attrs.push(t.objectProperty(t.identifier('data'), data.expression.right))
+                } else if (/created|attached|ready|moved|detached/.test(methodName)) { //自定义组件生命周期
+                    if (!isComponent()) return
+                    const fn = t.objectProperty(
+                        t.identifier(methodName),
+                        t.functionExpression(null, path.node.params, path.node.body, path.node.generator, path.node.async)
+                    )
+                    Attrs.push(fn)
+                } else if (isComponent()) { //自定义组件方法
+                    const fn = t.objectProperty(
+                        t.identifier(methodName),
+                        t.functionExpression(null, path.node.params, path.node.body, path.node.generator, path.node.async)
+                    )
+                    Methods.push(fn)
                 } else {
                     const fn = t.objectProperty(
                         t.identifier(methodName),
@@ -246,6 +281,59 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                     )
                     path.remove()
                 }
+
+                if (isComponent()) {
+                    const objProps = []
+                    referencedBy.forEach(function (referencedId) {
+                        const { dir, name } = _path.parse(referencedId)
+                        const componentPath = _path.format({ dir, name }).split('\\').join('/')
+                        ComponentRelations[componentPath] = { type: 'parent' }
+                    })
+
+                    Object.keys(ComponentRelations).forEach(key => {
+                        if (/pages/.test(key)) return
+                        const { name } = _path.parse(key)
+                        const componentPath = _path.format({ dir: key, name })
+                        objProps.push(
+                            t.objectProperty(
+                                t.stringLiteral(componentPath),
+                                t.objectExpression([
+                                    t.objectProperty(
+                                        t.identifier('type'),
+                                        t.stringLiteral(ComponentRelations[key].type)
+                                    ),
+                                ])
+                            )
+                        )
+                    })
+                    objProps.length && Attrs.push(
+                        t.objectProperty(
+                            t.identifier('relations'),
+                            t.objectExpression(objProps)
+                        )
+                    )
+                }
+
+                const componentProperties = []
+                Object.keys(Properties).forEach(key => {
+                    const { type, value } = Properties[key]
+                    const property = []
+                    property.push(t.objectProperty(t.identifier('type'), type))
+                    value && property.push(t.objectProperty(t.identifier('value'), value))
+
+                    componentProperties.push(
+                        t.objectProperty(t.identifier(key), t.objectExpression(property))
+                    )
+                })
+
+                if (Methods.length) {
+                    Attrs.push(t.objectProperty(t.identifier('methods'), t.objectExpression(Methods)))
+                }
+
+                if (componentProperties.length) {
+                    Attrs.push(t.objectProperty(t.identifier('properties'), t.objectExpression(componentProperties)))
+                }
+
                 //替换super结构体
                 if (superClass && /App|Page|Component/.test(superClass.name)) {
                     path.replaceWith(
@@ -276,7 +364,27 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                         path.remove()
                         break
                     }
+                    case 'page': {
+                        const { dir, name } = _path.parse(source)
+                        const pagePath = _path.join(dir.replace(`.${_path.sep}`, ''), name)
+                        ImportPages.push(pagePath)
+                        path.remove()
+                        break
+                    }
+                    case 'component': {
+                        const { dir, name } = _path.parse(source)
+                        const componentPath = _path.format({ dir, name })
+                        const modulePath = _path.join('..', componentPath)
+                        ImportComponents[moduleName] = modulePath
+                        ComponentRelations[_path.join('..', componentPath)] = { type: 'child' }
+                        path.remove()
+                        break
+                    }
                 }
+            }
+            if (/base/.test(source)) {
+                console.log(source)
+                path.remove()
             }
 
         }
@@ -287,11 +395,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
         traverse(AST, Object.assign({}, visitor, visitJSX)) //生成新AST
 
         if (Object.keys(ImportTemplates).length) {
-            console.log(ImportTemplates)
-            output.wxml =
-                Object.entries(ImportTemplates)
-                    .map(([, src]) => `<import src="${src.split('\\').join('/')}" />\n`)
-                    .join('') + output.wxml
+            output.wxml = Object.entries(ImportTemplates).map(([, src]) => `<import src="${src.split('\\').join('/')}" />\n`).join('') + output.wxml
         }
 
         output.js = isTemplate() //新AST=>代码
