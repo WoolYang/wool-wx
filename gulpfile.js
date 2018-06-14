@@ -13,8 +13,15 @@ const buildBundle = require('./tools/gulp-plugin-build-bundle');//自定义处�
 gulp.task('less-task', lessTask); //编译样式文件
 gulp.task('rollup-task', rollupTask);  //编译js模块
 gulp.task('copy-file-task', copyFileTask); //拷贝文件
-//gulp.task('babel-task', babelTask); //babel转码
-gulp.task('default', ['less-task', /* 'copy-file-task', */ 'rollup-task']);
+gulp.task('watch-task', watchTask); //监听文件
+
+gulp.task('default', ['less-task', 'copy-file-task', 'rollup-task', 'watch-task']);
+
+function watchTask() {
+    gulp.watch('./src/**/*.less', ['less-task'])
+    gulp.watch('./src/**/*.js', ['rollup-task'])
+    gulp.watch('./src/**/*.json', ['copy-file-task'])
+}
 
 function lessTask(done) {
     gulp.src(['./src/**/*/*.less', './src/*.less'])
@@ -24,17 +31,18 @@ function lessTask(done) {
         .pipe(rename((path) => {
             path.extname = '.wxss';
         }))
+        .pipe(changed('./dist'))
         .pipe(gulp.dest('./dist'))
-        .on('finish', () => { });
+        .on('finish', done);
 }
 
 function copyFileTask(done) {
     gulp.src([
         'src/*.json',
         'src/**/*/*.json',
-        'src/**/*/*.wxml',
-        'src/**/*/*.wxs',
-        'src/*.js',
+        //   'src/**/*/*.wxml',
+        //  'src/**/*/*.wxs',
+        //  'src/*.js',
     ])
         .pipe(changed('./dist'))
         .pipe(gulp.dest('./dist'))
@@ -79,6 +87,7 @@ function rollupTask(done) {
         .on('finish', done);
 }
 
+//gulp.task('babel-task', babelTask); //babel转码
 /* function babelTask(done) {
     gulp.src([
         'src/index.js'

@@ -5,7 +5,7 @@ export default class Index extends App {
     constructor() {
         super()
         this.state = {
-            globalData: {
+            globalData1111: {
                 userInfo: null
             }
         }
