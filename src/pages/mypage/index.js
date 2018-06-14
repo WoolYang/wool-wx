@@ -1,5 +1,5 @@
 import { Page } from '../../../tools/base.js';
-
+import tem from './templete/tem.js'
 export default class Index extends Page {
 
     constructor() {
@@ -8,7 +8,12 @@ export default class Index extends Page {
             motto: 'Hello World',
             userInfo: {},
             hasUserInfo: false,
-            canIUse: wx.canIUse('button.open-type.getUserInfo')
+            canIUse: wx.canIUse('button.open-type.getUserInfo'),
+            item: {
+                index: 0,
+                msg: 'this is a template',
+                time: '2016-09-15'
+            }
         }
     }
 
@@ -23,6 +28,9 @@ export default class Index extends Page {
             userInfo: e.detail.userInfo,
             hasUserInfo: true
         })
+    }
+    tapName(event) {
+        console.log(event)
     }
 
     render() {
@@ -50,7 +58,7 @@ export default class Index extends Page {
                 <checkbox checked={false}> </checkbox>
                 <view if={motto}> </view>
                 <view hidden={flag ? true : false}> Hidden </view>
-                <view> {a + b} + {c} + d}</view>
+                <view> {a + b} + {c} + d</view>
                 <view if={length > 6}> </view>
                 <view>{"hello" + name}</view>
                 <view>{object.key} {array[0]}</view>
@@ -58,6 +66,37 @@ export default class Index extends Page {
                 <template is="objectCombine" data={{ foo, bar }}></template>
                 <template is="objectCombine" data={{ ...obj1, ...obj2, e: 5 }}></template>
                 <template is="objectCombine" data={{ ...obj1, ...obj2, a, c: 6 }}></template>
+                <view for={array}>
+                    {index}: {item.message}
+                </view>
+                <view for={array} for-index="idx" for-item="itemName">
+                    {idx}: {itemName.message}
+                </view>
+                <block for={[1, 2, 3]}>
+                    <view> {index}: </view>
+                    <view> {item} </view>
+                </block>
+                <view for="array">
+                    {item}
+                </view>
+                <template name="msgItem">
+                    <view>
+                        <text> {index}: {msg} </text>
+                        <text> Time: {time} </text>
+                    </view>
+                </template>
+                <template is="msgItem" data={{ ...item }} />
+                <template name="odd">
+                    <view> odd </view>
+                </template>
+                <template name="even">
+                    <view> even </view>
+                </template>
+                <block for={[1, 2, 3, 4, 5]}>
+                    <template is={item % 2 == 0 ? 'even' : 'odd'} />
+                </block>
+                <view id="tapTest" data-hi="WeChat" onTap={tapName}> Click me! </view>
+                <tem is="tem" data={{ text: 'forbar' }} />
             </view>
         )
     }

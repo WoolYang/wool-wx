@@ -1,6 +1,6 @@
 
 const fs = require('fs')
-const path = require('path');
+const _path = require('path');
 const babylon = require('babylon') //用于解析代码生产AST
 const traverse = require('babel-traverse').default //用于遍历AST合成新的AST
 const t = require('babel-types') //用于访问AST
@@ -27,10 +27,10 @@ const parse = src => {
 const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePath }) => {
     const Attrs = [] //收集class 下属性
     const Methods = [] //收集component组件下方法
+    const ImportPages = []     //收集导入页面
+    const ImportComponents = {} //收集导入组件
+    const ImportTemplates = {} //收集导入模板
     const Properties = {}
-    const ImportPages = []
-    const ImportComponents = {}
-    const ImportTemplates = {}
     const ImportSources = []
     const ComponentRelations = {}
     const JSONAttrs = {}
@@ -137,7 +137,10 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
             if (/if|elif|else|for|key|for-index|for-item/.test(name.name)) {
                 path.node.name.name = `wx:${name.name}`
             } else if (/^on(\w*)$/.test(name.name)) {
-                path.node.name.name = name.name.replace(/^on(\w*)$/, 'bind$1').toLowerCase()
+                const nameNode = t.JSXIdentifier(name.name.replace(/^on(\w*)$/, 'bind:$1').toLowerCase())
+                const valueNode = t.StringLiteral(value.expression.name)
+                path.replaceWith(t.jSXAttribute(nameNode, valueNode))
+
             } else {
                 path.node.name.name = name.name
             }
@@ -158,6 +161,8 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                         return !raw && !name ? v : name ? v + `${raw}{{${name}}}` : v + raw
                     }, '')
                 )
+            } else if (/^bind:(\w*)|^on(\w*)$/.test(name.name)) { //on bind事件字符串替换，替换后原on节点依旧存在，待优化
+                path.node.value = t.stringLiteral(`${generate(value.expression).code}`)
             } else {
                 path.node.value = t.stringLiteral(`{{${generate(value.expression).code}}}`)
             }
@@ -214,15 +219,36 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
             enter(path) {
                 const { node: { declaration } } = path
                 const { superClass } = declaration
-                if (superClass && /App|Page|Component/.test(superClass.name)) { //转义页面类型
+                //标识template
+                if (t.isFunctionDeclaration(declaration) || t.isArrowFunctionExpression(declaration)) {
+                    const returned = declaration.body.body.find(t.isReturnStatement)
+                    if (!returned) return
+                    if (t.isJSXElement(returned.argument)) {
+                        output.type = 'template'
+                    }
+                }
+                //标识页面类型
+                if (superClass && /App|Page|Component/.test(superClass.name)) {
                     output.type = superClass.name.toLowerCase()
                 }
             },
             exit(path) {
                 const { node: { declaration } } = path
                 const { superClass } = declaration
-
-                if (superClass && /App|Page|Component/.test(superClass.name)) { //替换super结构体
+                //替换templete
+                if (isTemplate()) {
+                    const returned = declaration.body.body.find(t.isReturnStatement)
+                    if (declaration.id) output.name = declaration.id.name
+                    output.wxml = prettifyXml(
+                        `<template name="${output.name}">\n ${
+                        generate(returned.argument, { concise: true }).code
+                        } \n</template>`,
+                        { indent: 2 }
+                    )
+                    path.remove()
+                }
+                //替换super结构体
+                if (superClass && /App|Page|Component/.test(superClass.name)) {
                     path.replaceWith(
                         t.CallExpression(t.identifier(superClass.name), [
                             t.objectExpression(Attrs)
@@ -230,6 +256,30 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                     )
                 }
             }
+        },
+        ImportDeclaration(path) { //引入表达式转义
+            const source = path.node.source.value
+            let moduleName = path.node.specifiers.length ? path.node.specifiers[0].local.name : ''
+            let typedModule
+            if (id) {
+                const { dir } = _path.parse(id)
+                let dependedModuleId = _path.resolve(dir, source).split('\\').join('/');
+                typedModule = dependedModules[dependedModuleId]
+            } else {
+                typedModule = dependedModules[source]
+            }
+            if (typedModule) {
+                switch (typedModule.type) {
+                    case 'template': {
+                        const { dir, name } = _path.parse(source)
+                        const modulePath = _path.join('..', dir, `${name}.wxml`)
+                        ImportTemplates[moduleName] = modulePath
+                        path.remove()
+                        break
+                    }
+                }
+            }
+
         }
     }
     //代码转换为AST语法树

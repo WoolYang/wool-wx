@@ -10,8 +10,8 @@ function buildBundle(bundle) {
     const referenced = {}
     const mainId = bundle.modules[bundle.modules.length - 1].id
     const transformedModules = {}
-    const src = path.join('./src')
-    const target = path.join('./dist')
+    const src = path.resolve('./src')
+    const target = path.resolve('./dist')
 
     bundle.modules.forEach(({ id, dependencies, originalCode, resolvedIds }) => {
         dependencies.forEach(refId => {
@@ -20,7 +20,6 @@ function buildBundle(bundle) {
             }
             referenced[refId].push(path.relative(refId, id))
         })
-
         modules[id] = {
             id, //id标识
             code: originalCode, //源代码
