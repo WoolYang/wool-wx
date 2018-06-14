@@ -1,5 +1,3 @@
-import { App } from '../tools/base.js';
-
 import './pages/mypage/index.js';
 
 export default class Index extends App {

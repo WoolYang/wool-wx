@@ -1,6 +1,6 @@
-import { Page } from '../../../tools/base.js';
 import tem from './templete/tem.js' //引用一个模板
 import Header from './component/header/header.js' //引用一个组件
+import { formatTime } from '../../utils/util.js'
 export default class Index extends Page {
 
     constructor() {

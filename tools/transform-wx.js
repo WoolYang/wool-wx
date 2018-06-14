@@ -402,9 +402,9 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
             : babel.transform(generate(AST).code, {
                 babelrc: false,
                 plugins: [
-                    "transform-class-properties", "transform-object-rest-spread"
+                    "transform-class-properties", "transform-object-rest-spread", "transform-es2015-modules-commonjs"
                 ],
-            }).code.replace('"use strict";\n\n', '')
+            }).code.replace("'use strict';\n\n", '')
         return output
     } catch (e) {
         console.error(e);

@@ -48,7 +48,7 @@ function rollupTask(done) {
         'tools/base.js'
     ])
         .pipe(rollup({
-            input: ['src/index.js'],
+            input: ['src/app.js'],
             output: {
                 format: 'es'
             },

@@ -1,4 +1,3 @@
-import { Component } from '../../../../../tools/base.js';
 export default class Header extends Component {
     render() {
         return (
