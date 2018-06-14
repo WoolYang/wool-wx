@@ -31,9 +31,9 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
     const ImportComponents = {} //收集导入组件
     const ImportTemplates = {} //收集导入模板
     const Properties = {} //收集组件属性/默认值
-    const ImportSources = []
     const ComponentRelations = {} //收集组件关联
     const JSONAttrs = {} //收集json
+    const ImportSources = []
     const output = { type: 'local_module' }
 
     const isTemplate = function () {
@@ -383,7 +383,6 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                 }
             }
             if (/base/.test(source)) {
-                console.log(source)
                 path.remove()
             }
 

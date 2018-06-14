@@ -49,6 +49,9 @@ function rollupTask(done) {
     ])
         .pipe(rollup({
             input: ['src/index.js'],
+            output: {
+                format: 'es'
+            },
             plugins: [ //转义
                 rollup_babel({
                     babelrc: false,
@@ -70,7 +73,7 @@ function rollupTask(done) {
             }
         }))
         .on('bundle', buildBundle)
-        .on('error', err => { } /* console.error(err.stack || err) */)
+        .on('error', err => { console.error(err.stack || err) } /* console.error(err.stack || err) */)
         .pipe(changed('./dist'))
         // .pipe(gulp.dest('./dist'))
         .on('finish', done);
