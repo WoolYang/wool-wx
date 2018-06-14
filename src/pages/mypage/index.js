@@ -1,5 +1,6 @@
 import { Page } from '../../../tools/base.js';
-import tem from './templete/tem.js'
+import tem from './templete/tem.js' //引用一个模板
+import Header from './component/header/header.js' //引用一个组件
 export default class Index extends Page {
 
     constructor() {
@@ -96,7 +97,7 @@ export default class Index extends Page {
                     <template is={item % 2 == 0 ? 'even' : 'odd'} />
                 </block>
                 <view id="tapTest" data-hi="WeChat" onTap={tapName}> Click me! </view>
-                <tem is="tem" data={{ text: 'forbar' }} />
+                <tem {...item} />
             </view>
         )
     }

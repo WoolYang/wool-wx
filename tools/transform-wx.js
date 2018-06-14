@@ -51,10 +51,11 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
 
     const visitJSX = {
         JSXOpeningElement(path) { //jsx标签转义
+            //template标签转义
             if (ImportTemplates[path.node.name.name]) {
                 const templateName = path.node.name.name
                 path.node.name.name = 'template'
-
+                //
                 const templateData = path.node.attributes
                     .reduce((all, x) => {
                         if (x.type === 'JSXSpreadAttribute')
@@ -74,9 +75,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                             else all.push(`${x.name.name}: ${v}`)
                         }
                         return all
-                    }, [])
-                    .join(', ') //?
-
+                    }, []).join(',')
                 path.node.attributes = [
                     t.jSXAttribute(t.jSXIdentifier('is'), t.stringLiteral(templateName)),
                     t.jSXAttribute(
@@ -286,6 +285,15 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
     try {
         const AST = parse(code); //构建AST
         traverse(AST, Object.assign({}, visitor, visitJSX)) //生成新AST
+
+        if (Object.keys(ImportTemplates).length) {
+            console.log(ImportTemplates)
+            output.wxml =
+                Object.entries(ImportTemplates)
+                    .map(([, src]) => `<import src="${src.split('\\').join('/')}" />\n`)
+                    .join('') + output.wxml
+        }
+
         output.js = isTemplate() //新AST=>代码
             ? null
             : babel.transform(generate(AST).code, {
