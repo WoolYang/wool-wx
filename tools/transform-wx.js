@@ -180,7 +180,6 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
         },
         MemberExpression(path) { //state转义
             if (path.node.property.name === 'state') {
-                console.log(path.node.property.name)
                 path.node.property.name = 'data'
             }
         },

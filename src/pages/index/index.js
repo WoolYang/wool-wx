@@ -1,4 +1,3 @@
-
 const app = getApp()
 
 export default class Index extends Page {
@@ -6,7 +5,7 @@ export default class Index extends Page {
     constructor() {
         super()
         this.state = {
-            motto: 'Hello World1',
+            motto: 'Hello World',
             userInfo: {},
             hasUserInfo: false,
             canIUse: wx.canIUse('button.open-type.getUserInfo')
