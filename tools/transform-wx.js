@@ -176,6 +176,13 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
             ) {
                 path.node.callee.property.name = 'setData'
             }
+
+        },
+        MemberExpression(path) { //state转义
+            if (path.node.property.name === 'state') {
+                console.log(path.node.property.name)
+                path.node.property.name = 'data'
+            }
         },
         ClassProperty(path) {
             //处理自定义组件默认值
@@ -228,7 +235,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                     }
                 } else if (methodName === 'constructor') {
                     const data = path.node.body.body.find(
-                        x => x.expression.left && x.expression.left.property.name === 'state'
+                        x => x.expression.left && x.expression.left.property.name === 'data'
                     )
                     Attrs.push(t.objectProperty(t.identifier('data'), data.expression.right))
                 } else if (/created|attached|ready|moved|detached/.test(methodName)) { //自定义组件生命周期

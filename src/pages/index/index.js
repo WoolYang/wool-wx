@@ -6,7 +6,7 @@ export default class Index extends Page {
     constructor() {
         super()
         this.state = {
-            motto: 'Hello World',
+            motto: 'Hello World1',
             userInfo: {},
             hasUserInfo: false,
             canIUse: wx.canIUse('button.open-type.getUserInfo')
@@ -26,7 +26,7 @@ export default class Index extends Page {
                 userInfo: app.globalData.userInfo,
                 hasUserInfo: true
             })
-        } else if (this.data.canIUse) {
+        } else if (this.state.canIUse) {
             // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
             // 所以此处加入 callback 以防止这种情况
             app.userInfoReadyCallback = res => {
@@ -72,7 +72,6 @@ export default class Index extends Page {
                     <text class="user-motto">{motto}</text>
                 </view>
             </view>
-
         )
     }
 }
