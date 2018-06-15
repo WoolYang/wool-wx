@@ -1,14 +1,10 @@
-import './pages/mypage/index.js';
+import './pages/index/index.js';
+import './pages/logs/logs.js';
 
 export default class Index extends App {
 
-    constructor() {
-        super()
-        this.state = {
-            globalData1111: {
-                userInfo: null
-            }
-        }
+    globalData = {
+        userInfo: null
     }
 
     onLaunch() {
@@ -34,7 +30,7 @@ export default class Index extends App {
                             this.state.userInfo = res.userInfo
 
                             // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
-                            // 所以此处加入 callback 以防止这种情况
+                            // 所以此处加入 ·callback 以防止这种情况
                             if (this.userInfoReadyCallback) {
                                 this.userInfoReadyCallback(res)
                             }
@@ -44,7 +40,4 @@ export default class Index extends App {
             }
         })
     }
-
-
-
 }

@@ -197,6 +197,10 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                         Properties[key].type = t.identifier(type)
                     }
                 })
+            } else if (isApp()) { //app页转义类属性
+                Attrs.push(
+                    t.objectProperty(t.identifier(path.node.key.name), path.node.value)
+                )
             }
         },
         ClassMethod: { //属性方法访问器转义
