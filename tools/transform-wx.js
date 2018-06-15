@@ -169,6 +169,26 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
     }
 
     const visitor = {
+        Program: {
+            exit(path) {
+                /*                if (isComponent() || isPage() || isApp()) {
+                                   const srcPath = sourcePath.split('\\').join('/')
+                                   const relativeWX = _path.relative(id, _path.join(sourcePath, '/utils/wx.js'))
+                                   path.node.body.unshift(
+                                       t.variableDeclaration(
+                                           'const',
+                                           [t.variableDeclarator(
+                                               t.identifier("wx1"),
+                                               t.callExpression(
+                                                   t.identifier("require"),
+                                                   [t.stringLiteral(relativeWX)]
+                                               )
+                                           )]
+                                       )
+                                   )
+                               } */
+            }
+        },
         CallExpression(path) { //调用表达式转义
             if (
                 path.get('callee').isMemberExpression() &&

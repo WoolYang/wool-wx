@@ -1,6 +1,5 @@
 import './pages/index/index.js';
 import './pages/logs/logs.js';
-import wx1 from './utils/wx'
 export default class Index extends App {
 
     globalData = {
