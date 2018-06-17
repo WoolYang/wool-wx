@@ -1,5 +1,5 @@
 /* global wx*/
-import promisify, { promisifyReturns } from './promisify'
+const { promisify, promisifyReturns } = require('./promisify')
 const exceptProgramAPI = `closeSocket
 stopRecord
 getRecorderManager
@@ -95,4 +95,5 @@ if (wx.getFileSystemManager) {
     })
 }
 const wx1 = promisifiedWxApi
-export default wx1
+module.exports = wx1
+//export default wx1

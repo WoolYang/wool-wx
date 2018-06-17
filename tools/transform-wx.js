@@ -171,22 +171,22 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
     const visitor = {
         Program: {
             exit(path) {
-                /*                if (isComponent() || isPage() || isApp()) {
-                                   const srcPath = sourcePath.split('\\').join('/')
-                                   const relativeWX = _path.relative(id, _path.join(sourcePath, '/utils/wx.js'))
-                                   path.node.body.unshift(
-                                       t.variableDeclaration(
-                                           'const',
-                                           [t.variableDeclarator(
-                                               t.identifier("wx1"),
-                                               t.callExpression(
-                                                   t.identifier("require"),
-                                                   [t.stringLiteral(relativeWX)]
-                                               )
-                                           )]
-                                       )
-                                   )
-                               } */
+                if (isComponent() || isPage() || isApp()) {
+                    const relativeWX = _path.relative(_path.parse(id).dir, _path.join(sourcePath, 'apis', 'wx.js')).split('\\').join('/')
+                    const dest = isApp() ? './' + relativeWX : relativeWX
+                    path.node.body.unshift(
+                        t.variableDeclaration(
+                            'const',
+                            [t.variableDeclarator(
+                                t.identifier("wx1"),
+                                t.callExpression(
+                                    t.identifier("require"),
+                                    [t.stringLiteral(dest)]
+                                )
+                            )]
+                        )
+                    )
+                }
             }
         },
         CallExpression(path) { //调用表达式转义

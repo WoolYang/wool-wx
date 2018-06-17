@@ -14,8 +14,9 @@ gulp.task('less-task', lessTask); //编译样式文件
 gulp.task('rollup-task', rollupTask);  //编译js模块
 gulp.task('copy-file-task', copyFileTask); //拷贝文件
 gulp.task('watch-task', watchTask); //监听文件
+gulp.task('copy-API-file-task', copyAPIFileTask); //监听文件
 
-gulp.task('default', ['less-task', 'copy-file-task', 'rollup-task', 'watch-task']);
+gulp.task('default', ['less-task', 'copy-file-task', 'rollup-task', 'watch-task', 'copy-API-file-task']);
 
 function watchTask() {
     gulp.watch('./src/**/*.less', ['less-task'])
@@ -40,12 +41,22 @@ function copyFileTask(done) {
     gulp.src([
         'src/*.json',
         'src/**/*/*.json',
+        'src/apis/*.js'
         //   'src/**/*/*.wxml',
         //  'src/**/*/*.wxs',
         //  'src/*.js',
     ])
         .pipe(changed('./dist'))
         .pipe(gulp.dest('./dist'))
+        .on('finish', done);
+}
+
+function copyAPIFileTask(done) {
+    gulp.src([
+        'src/apis/*.js'
+    ])
+        .pipe(changed('./dist/apis'))
+        .pipe(gulp.dest('./dist/apis'))
         .on('finish', done);
 }
 

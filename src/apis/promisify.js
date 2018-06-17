@@ -1,6 +1,6 @@
 // modify pify@3.0.0 https://github.com/sindresorhus/pify
 const processFn = (fn, opts) =>
-  function() {
+  function () {
     const P = opts.promiseModule
     const args = new Array(arguments.length)
 
@@ -11,12 +11,12 @@ const processFn = (fn, opts) =>
     return new P((resolve, reject) => {
       if (opts.objectParams && (!args[0] || typeof args[0] === 'object')) {
         args[0] = args[0] || {}
-        args[0].success = function(result) { resolve(result)}
-        args[0].fail = function(result) { reject(result)}
+        args[0].success = function (result) { resolve(result) }
+        args[0].fail = function (result) { reject(result) }
         // todo: complete 的处理
         args[0].complete = null
       } else if (opts.errorFirst) {
-        args.push(function(err, result) {
+        args.push(function (err, result) {
           if (opts.multiArgs) {
             const results = new Array(arguments.length - 1)
 
@@ -37,7 +37,7 @@ const processFn = (fn, opts) =>
           }
         })
       } else {
-        args.push(function(result) {
+        args.push(function (result) {
           if (opts.multiArgs) {
             const results = new Array(arguments.length - 1)
 
@@ -56,7 +56,7 @@ const processFn = (fn, opts) =>
     })
   }
 
-export default function promisify(obj, opts) {
+function promisify(obj, opts) {
   opts = Object.assign(
     {
       exclude: [/.+(Sync|Stream)$/],
@@ -74,7 +74,7 @@ export default function promisify(obj, opts) {
 
   let ret
   if (typeof obj === 'function') {
-    ret = function() {
+    ret = function () {
       if (opts.excludeMain) {
         return obj.apply(this, arguments)
       }
@@ -94,8 +94,8 @@ export default function promisify(obj, opts) {
   return ret
 }
 
-export function promisifyReturns(fn, include) {
-  return function(...args) {
+function promisifyReturns(fn, include) {
+  return function (...args) {
     const ret = fn(...args)
     for (const key in include) {
       const x = ret[key]
@@ -103,4 +103,9 @@ export function promisifyReturns(fn, include) {
     }
     return ret
   }
+}
+
+module.exports = {
+  promisify,
+  promisifyReturns
 }

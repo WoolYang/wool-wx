@@ -1,5 +1,5 @@
 import { formatTime } from '../../utils/util.js'
-//import { default as wx } from '../../utils/wx.js'
+
 export default class Logs extends Page {
 
   constructor() {
