@@ -171,6 +171,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
     const visitor = {
         Program: {
             exit(path) {
+                //自动注入api
                 if (isComponent() || isPage() || isApp()) {
                     const relativeWX = _path.relative(_path.parse(id).dir, _path.join(sourcePath, 'apis', 'wx.js')).split('\\').join('/')
                     const dest = isApp() ? './' + relativeWX : relativeWX
