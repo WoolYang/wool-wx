@@ -21,7 +21,7 @@ const parseAst = src => {
         sourceType: 'module',
         plugins: ['jsx', 'objectRestSpread', 'classProperties'],
     }
-    return babylon.parseAst(src, options)
+    return babylon.parse(src, options)
 }
 
 const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePath }) => {
@@ -55,7 +55,6 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
             if (ImportTemplates[path.node.name.name]) {
                 const templateName = path.node.name.name
                 path.node.name.name = 'template'
-                //
                 const templateData = path.node.attributes
                     .reduce((all, x) => {
                         if (x.type === 'JSXSpreadAttribute')
@@ -63,19 +62,18 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                         else if (x.value.type === 'StringLiteral')
                             all.push(`${x.name.name}: '${x.value.value}'`)
                         else if (x.value.type === 'JSXExpressionContainer') {
-                            const v = generate(x.value.expression).code
-                            if (x.value.expression.type === 'Identifier' && v === x.name.name)
+                            const v = generate(x.value.expression, { concise: true }).code
+                            if (x.value.expression.type === 'Identifier') {
                                 all.push(`${v}`)
-                            else if (
-                                x.value.expression.type === 'Identifier' &&
-                                v !== x.name.name
-                            ) {
-                                return all // attribute MUST be defined
                             }
-                            else all.push(`${x.name.name}: ${v}`)
+                            else {
+                                all.push(`${x.name.name}: ${v}`)
+                            }
                         }
                         return all
                     }, []).join(',')
+
+                console.log(templateData)
                 path.node.attributes = [
                     t.jSXAttribute(t.jSXIdentifier('is'), t.stringLiteral(templateName)),
                     t.jSXAttribute(
@@ -395,7 +393,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                 switch (typedModule.type) {
                     case 'template': {
                         const { dir, name } = _path.parse(source)
-                        const modulePath = _path.join('..', dir, `${name}.wxml`)
+                        const modulePath = _path.join(dir, `${name}.wxml`)
                         ImportTemplates[moduleName] = modulePath
                         path.remove()
                         break
@@ -418,15 +416,11 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                     }
                 }
             }
-            if (/base/.test(source)) {
-                path.remove()
-            }
-
         }
     }
     //代码转换为AST语法树
     try {
-        const AST = parse(code); //构建AST
+        const AST = parseAst(code); //构建AST
         traverse(AST, Object.assign({}, visitor, visitJSX)) //生成新AST
 
         if (Object.keys(ImportTemplates).length) {
