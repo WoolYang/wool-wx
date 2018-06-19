@@ -15,13 +15,13 @@ const zip = arrays => {
     return shortest.map((_, i) => arrays.map(array => array[i]));
 }
 
-const parse = src => {
+const parseAst = src => {
     const options = {
         babelrc: false,
         sourceType: 'module',
         plugins: ['jsx', 'objectRestSpread', 'classProperties'],
     }
-    return babylon.parse(src, options)
+    return babylon.parseAst(src, options)
 }
 
 const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePath }) => {
