@@ -14,7 +14,7 @@ export default class Index extends Page {
 
     //事件处理函数
     bindViewTap() {
-        wx.navigateTo({
+        wxx.navigateTo({
             url: '../logs/logs'
         })
     }
@@ -36,14 +36,12 @@ export default class Index extends Page {
             }
         } else {
             // 在没有 open-type=getUserInfo 版本的兼容处理
-            wx.getUserInfo({
-                success: res => {
-                    app.globalData.userInfo = res.userInfo
-                    this.setState({
-                        userInfo: res.userInfo,
-                        hasUserInfo: true
-                    })
-                }
+            wxx.getUserInfo().then(res => {
+                app.globalData.userInfo = res.userInfo
+                this.setState({
+                    userInfo: res.userInfo,
+                    hasUserInfo: true
+                })
             })
         }
     }

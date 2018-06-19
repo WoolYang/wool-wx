@@ -59,7 +59,6 @@ const processFn = (fn, opts) =>
 function promisify(obj, opts) {
   opts = Object.assign(
     {
-      exclude: [/.+(Sync|Stream)$/],
       errorFirst: true,
       promiseModule: Promise
     },

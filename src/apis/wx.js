@@ -1,52 +1,188 @@
 /* global wx*/
 const { promisify, promisifyReturns } = require('./promisify')
-const exceptProgramAPI = `closeSocket
+const promiseAPI = `uploadFile
+downloadFile
+connectSocket
+sendSocketMessage
+closeSocket
+chooseImage
+previewImage
+getImageInfo
+saveImageToPhotosAlbum
+startRecord
 stopRecord
+playVoice
+getBackgroundAudioPlayerState
+playBackgroundAudio
+seekBackgroundAudio
+chooseVideo
+saveVideoToPhotosAlbum
+loadFontFace
+saveFile
+getFileInfo
+getSavedFileList
+getSavedFileInfo
+removeSavedFile
+openDocument
+setStorage
+getStorage
+getStorageInfo
+removeStorage
+getLocation
+chooseLocation
+openLocation
+getSystemInfo
+getNetworkType
+startAccelerometer
+stopAccelerometer
+startCompass
+stopCompass
+makePhoneCall
+scanCode
+setClipboardData
+getClipboardData
+openBluetoothAdapter
+closeBluetoothAdapter
+getBluetoothAdapterState
+startBluetoothDevicesDiscovery
+stopBluetoothDevicesDiscovery
+getBluetoothDevices
+getConnectedBluetoothDevices
+createBLEConnection
+closeBLEConnection
+getBLEDeviceServices
+startBeaconDiscovery
+stopBeaconDiscovery
+getBeacons
+setScreenBrightness
+getScreenBrightness
+setKeepScreenOn
+vibrateLong
+vibrateShort
+addPhoneContact
+getHCEState
+startHCE
+stopHCE
+sendHCEMessage
+startWifi
+stopWifi
+connectWifi
+getWifiList
+setWifiList
+getConnectedWifi
+showToast
+showLoading
+showModal
+showActionSheet
+setNavigationBarTitle
+setNavigationBarColor
+setTabBarBadge
+removeTabBarBadge
+showTabBarRedDot
+hideTabBarRedDot
+setTabBarStyle
+setTabBarItem
+showTabBar
+hideTabBar
+setBackgroundColor
+setBackgroundTextStyle
+setTopBarText
+navigateTo
+redirectTo
+switchTab
+navigateBack
+reLaunch
+startPullDownRefresh
+getExtConfig
+login
+checkSession
+authorize
+getUserInfo
+requestPayment
+showShareMenu
+hideShareMenu
+updateShareMenu
+getShareInfo
+chooseAddress
+addCard
+openCard
+openSetting
+getSetting
+getWeRunData
+navigateToMiniProgram
+navigateBackMiniProgram
+chooseInvoiceTitle
+checkIsSupportSoterAuthentication
+startSoterAuthentication
+checkIsSoterEnrolledInDevice
+setEnableDebug
+`
+
+const noPromiseAPI = `onSocketOpen
+onSocketError
+onSocketClose
 getRecorderManager
 pauseVoice
 stopVoice
 pauseBackgroundAudio
 stopBackgroundAudio
+onBackgroundAudioPlay
+onBackgroundAudioPause
+onBackgroundAudioStop
 getBackgroundAudioManager
 createAudioContext
 createInnerAudioContext
 createVideoContext
+createCameraContext
+createLivePlayerContext
+createLivePusherContext
+setStorageSync
+getStorageSync
+getStorageInfoSync
+removeStorageSync
+clearStorage
+clearStorageSync
 createMapContext
+getSystemInfoSync
 canIUse
+onMemoryWarning
+onNetworkStatusChange
+onAccelerometerChange
+onCompassChange
+onBluetoothAdapterStateChange
+onBLECharacteristicValueChange
+onBeaconUpdate
+onBeaconServiceChange
+onUserCaptureScreen
+onHCEMessage
+onGetWifiList
+onWifiConnected
 hideToast
 hideLoading
 showNavigationBarLoading
 hideNavigationBarLoading
-navigateBack
 createAnimation
 pageScrollTo
-createSelectorQuery
 createCanvasContext
-createContext
-drawCanvas
+createContext 
+drawCanvas 
+canvasToTempFilePath
+canvasGetImageData
+canvasPutImageData
 stopPullDownRefresh
 createSelectorQuery
+createIntersectionObserver
 getExtConfigSync
-createCameraContext
-createLivePlayerContext
-createLivePusherContext
-getUserInfo
-getSetting
-login`
-
-const exceptGameAPI = `createImage
-loadFont
-setPreferredFramesPerSecond
-getFileSystemManager`
+getUpdateManager
+createWorker
+reportMonitor
+reportAnalytics
+`
 
 const promisifiedWxApi = promisify(wx, {
     objectParams: true,
     exclude: [
-        /^on/,
-        /^off/,
-        /Sync$/,
-        new RegExp(exceptProgramAPI.split(/\r\n|\r|\n/).join('|'), 'gi'),
-        new RegExp(exceptGameAPI.split(/\r\n|\r|\n/).join('|'), 'gi'),
+        new RegExp(noPromiseAPI.split(/\r\n|\r|\n/).join('|'), 'gi'),
     ],
 })
 
@@ -63,6 +199,8 @@ if (wx.createLivePlayerContext) {
         play: { objectParams: true },
         stop: { objectParams: true },
         mute: { objectParams: true },
+        pause: { objectParams: true },
+        resume: { objectParams: true },
         requestFullScreen: { objectParams: true },
         exitFullScreen: { objectParams: true },
     })
@@ -73,27 +211,13 @@ if (wx.createLivePusherContext) {
         play: { objectParams: true },
         stop: { objectParams: true },
         mute: { objectParams: true },
-        requestFullScreen: { objectParams: true },
-        exitFullScreen: { objectParams: true },
+        pause: { objectParams: true },
+        resume: { objectParams: true },
+        switchCamera: { objectParams: true },
+        snapshot: { objectParams: true },
+        snapshot: { toggleTorch: true },
     })
 }
 
-if (wx.getFileSystemManager) {
-    promisifiedWxApi.getFileSystemManager = promisifyReturns(wx.getFileSystemManager.bind(wx), {
-        access: { objectParams: true },
-        copyFile: { objectParams: true },
-        getFileInfo: { objectParams: true },
-        mkdir: { objectParams: true },
-        rmdir: { objectParams: true },
-        rename: { objectParams: true },
-        readFile: { objectParams: true },
-        readdir: { objectParams: true },
-        saveFile: { objectParams: true },
-        stat: { objectParams: true },
-        writeFile: { objectParams: true },
-        unlink: { objectParams: true },
-    })
-}
-const wx1 = promisifiedWxApi
-module.exports = wx1
-//export default wx1
+const wxx = promisifiedWxApi
+module.exports = wxx

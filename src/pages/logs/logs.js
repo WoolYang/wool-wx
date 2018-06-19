@@ -11,7 +11,7 @@ export default class Logs extends Page {
 
   onLoad() {
     this.setData({
-      logs: (wx.getStorageSync('logs') || []).map(log => {
+      logs: (wxx.getStorageSync('logs') || []).map(log => {
         return formatTime(new Date(log))
       })
     })

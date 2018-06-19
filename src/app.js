@@ -8,18 +8,11 @@ export default class Index extends App {
 
     onLaunch() {
         // 展示本地存储能力
-        var logs = wx.getStorageSync('logs') || []
+        var logs = wxx.getStorageSync('logs') || []
         logs.unshift(Date.now())
-        wx.setStorageSync('logs', logs)
+        wxx.setStorageSync('logs', logs)
 
-        // 登录
-        wx.login({
-            success: res => {
-                console.log(res)
-                // 发送 res.code 到后台换取 openId, sessionKey, unionId
-            }
-        })
-        wx1.login().then(res => {
+        wxx.login().then(res => {
             console.log(res)
         })
     }

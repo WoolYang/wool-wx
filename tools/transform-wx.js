@@ -179,7 +179,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                         t.variableDeclaration(
                             'const',
                             [t.variableDeclarator(
-                                t.identifier("wx1"),
+                                t.identifier("wxx"),
                                 t.callExpression(
                                     t.identifier("require"),
                                     [t.stringLiteral(dest)]
