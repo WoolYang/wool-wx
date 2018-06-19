@@ -5,7 +5,7 @@ export default class Index extends Page {
     constructor() {
         super()
         this.state = {
-            motto: 'Hello World',
+            motto: 'Hello World!',
             userInfo: {},
             hasUserInfo: false,
             canIUse: wx.canIUse('button.open-type.getUserInfo')

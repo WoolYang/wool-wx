@@ -2,9 +2,9 @@ const fs = require('fs')
 const path = require('path');
 const mkdirp = require('mkdirp'); //创建中间层级文件夹
 
-const transform = require('./transform-wx.js');
+const transform = require('./transform-wx');
 
-function buildBundle(bundle) {
+function buildwx(bundle) {
     //重新转换bundle
     const modules = {}
     const referenced = {}
@@ -73,4 +73,4 @@ function writeOutput(output, paths) {
     }
 }
 
-module.exports = buildBundle;
+module.exports = buildwx;
