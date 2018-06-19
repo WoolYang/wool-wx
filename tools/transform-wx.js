@@ -34,7 +34,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
     const ComponentRelations = {} //收集组件关联
     const JSONAttrs = {} //收集json
     const ImportSources = []
-    const output = { type: 'local_module' }
+    const output = { type: 'local_module', error: '' }
 
     const isTemplate = function () {
         return output.type === 'template'
@@ -57,21 +57,26 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                 path.node.name.name = 'template'
                 const templateData = path.node.attributes
                     .reduce((all, x) => {
-                        if (x.type === 'JSXSpreadAttribute')
+                        if (x.name.name === 'data') {
+                            output.type = null
+                            output.error = 'templates组件的属性名称不能使用data！'
+                            output.errorLine = x.name.loc.start.line
+                        }
+                        else if (x.type === 'JSXSpreadAttribute') {
                             all.push(`...${x.argument.name}`)
-                        else if (x.value.type === 'StringLiteral')
+                        }
+                        else if (x.value.type === 'StringLiteral') {
                             all.push(`${x.name.name}: '${x.value.value}'`)
+                        }
                         else if (x.value.type === 'JSXExpressionContainer') {
                             const v = generate(x.value.expression, { concise: true }).code
                             if (x.value.expression.type === 'Identifier' && v === x.name.name) {
                                 all.push(`${v}`)
-                            } else if (
-                                x.value.expression.type === 'Identifier' &&
-                                v !== x.name.name
-                            ) {
+                            } else if (x.value.expression.type === 'Identifier' && v !== x.name.name) {
                                 return all
+                            } else {
+                                all.push(`${x.name.name}: ${v}`)
                             }
-                            else all.push(`${x.name.name}: ${v}`)
                         }
                         return all
                     }, []).join(',')
@@ -421,26 +426,23 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
         }
     }
     //代码转换为AST语法树
-    try {
-        const AST = parseAst(code); //构建AST
-        traverse(AST, Object.assign({}, visitor, visitJSX)) //生成新AST
+    const AST = parseAst(code); //构建AST
+    traverse(AST, Object.assign({}, visitor, visitJSX)) //生成新AST
 
-        if (Object.keys(ImportTemplates).length) {
-            output.wxml = Object.entries(ImportTemplates).map(([, src]) => `<import src="${src.split('\\').join('/')}" />\n`).join('') + output.wxml
-        }
-
-        output.js = isTemplate() //新AST=>代码
-            ? null
-            : babel.transform(generate(AST).code, {
-                babelrc: false,
-                plugins: [
-                    "transform-class-properties", "transform-object-rest-spread", "transform-es2015-modules-commonjs"
-                ],
-            }).code.replace("'use strict';\n\n", '')
-        return output
-    } catch (e) {
-        console.error(e);
+    if (Object.keys(ImportTemplates).length) {
+        output.wxml = Object.entries(ImportTemplates).map(([, src]) => `<import src="${src.split('\\').join('/')}" />\n`).join('') + output.wxml
     }
+
+    output.js = isTemplate() //新AST=>代码
+        ? null
+        : babel.transform(generate(AST).code, {
+            babelrc: false,
+            plugins: [
+                "transform-class-properties", "transform-object-rest-spread", "transform-es2015-modules-commonjs"
+            ],
+        }).code.replace("'use strict';\n\n", '')
+    return output
+
 }
 
 module.exports = transform
