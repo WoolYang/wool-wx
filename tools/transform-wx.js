@@ -63,17 +63,19 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                             all.push(`${x.name.name}: '${x.value.value}'`)
                         else if (x.value.type === 'JSXExpressionContainer') {
                             const v = generate(x.value.expression, { concise: true }).code
-                            if (x.value.expression.type === 'Identifier') {
+                            if (x.value.expression.type === 'Identifier' && v === x.name.name) {
                                 all.push(`${v}`)
+                            } else if (
+                                x.value.expression.type === 'Identifier' &&
+                                v !== x.name.name
+                            ) {
+                                return all
                             }
-                            else {
-                                all.push(`${x.name.name}: ${v}`)
-                            }
+                            else all.push(`${x.name.name}: ${v}`)
                         }
                         return all
                     }, []).join(',')
 
-                console.log(templateData)
                 path.node.attributes = [
                     t.jSXAttribute(t.jSXIdentifier('is'), t.stringLiteral(templateName)),
                     t.jSXAttribute(
