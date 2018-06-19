@@ -13,7 +13,6 @@ const processFn = (fn, opts) =>
         args[0] = args[0] || {}
         args[0].success = function (result) { resolve(result) }
         args[0].fail = function (result) { reject(result) }
-        // todo: complete 的处理
         args[0].complete = null
       } else if (opts.errorFirst) {
         args.push(function (err, result) {
@@ -85,7 +84,6 @@ function promisify(obj, opts) {
   }
 
   for (const key in obj) {
-    // eslint-disable-line guard-for-in
     const x = obj[key]
     ret[key] = typeof x === 'function' && filter(key) ? processFn(x, opts) : x
   }
