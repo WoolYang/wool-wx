@@ -33,8 +33,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
     const Properties = {} //收集组件属性/默认值
     const ComponentRelations = {} //收集组件关联
     const JSONAttrs = {} //收集json
-    const ImportSources = []
-    const output = { type: 'local_module', error: '' }
+    const output = { type: 'bundle', error: '' }
 
     const isTemplate = function () {
         return output.type === 'template'
@@ -49,6 +48,13 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
         return output.type === 'app'
     }
 
+    function handleError(error, position) {
+        output.type = null
+        output.error = error
+        output.errorLine = position.loc.start.line
+        output.errorCode = code.split(/\r\n|\r|\n/)[position.loc.start.line - 1]
+    }
+
     const visitJSX = {
         JSXOpeningElement(path) { //jsx标签转义
             //template标签转义
@@ -58,9 +64,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                 const templateData = path.node.attributes
                     .reduce((all, x) => {
                         if (x.name.name === 'data') {
-                            output.type = null
-                            output.error = 'templates组件的属性名称不能使用data！'
-                            output.errorLine = x.name.loc.start.line
+                            handleError('templates组件的属性名称不能使用data！', x.name)
                         }
                         else if (x.type === 'JSXSpreadAttribute') {
                             all.push(`...${x.argument.name}`)
@@ -306,6 +310,8 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                 //标识页面类型
                 if (superClass && /App|Page|Component/.test(superClass.name)) {
                     output.type = superClass.name.toLowerCase()
+                } else if (superClass && !/App|Page|Component/.test(superClass.name)) {
+                    handleError(`不存在的页面类型${superClass.name}！`, superClass)
                 }
             },
             exit(path) {

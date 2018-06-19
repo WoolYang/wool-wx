@@ -4,9 +4,10 @@ const mkdirp = require('mkdirp'); //创建中间层级文件夹
 const chalk = require('chalk');
 const transform = require('./transform-wx');
 
-function errMsg(str, err, errorLine) {
+function errMsg(str, err, errorLine, errorCode) {
     const line = errorLine ? `[line:${errorLine}]` : '';
-    return console.log(chalk.red.bold(`[ERROR]${line} ${str}`, err))
+    console.log(chalk.red.bold(`[ERROR]${line} ${str}`, err))
+    console.log(chalk.blue.bold(`>>> `), chalk.red.bold(`${errorCode}`))
 }
 
 function buildwx(bundle) {
@@ -58,7 +59,7 @@ function generator(id, modules, transformedModules, paths, referenced) {
 
 function writeOutput(output, paths) {
     try {
-        const { id, type, js, error, errorLine } = output //输出内容
+        const { id, type, js, error, errorLine, errorCode } = output //输出内容
         const { target, src } = paths //目标，源路径
         const { name, dir } = path.parse(path.join(target, path.relative(src, id))) // 路径对接
 
@@ -71,7 +72,7 @@ function writeOutput(output, paths) {
                 }
             })
         } else {
-            errMsg(id, error, errorLine)
+            errMsg(id, error, errorLine, errorCode)
         }
     } catch (e) {
         console.log(e)
