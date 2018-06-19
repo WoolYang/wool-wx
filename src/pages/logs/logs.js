@@ -10,7 +10,7 @@ export default class Logs extends Page {
   }
 
   onLoad() {
-    this.setData({
+    this.setState({
       logs: (wxx.getStorageSync('logs') || []).map(log => {
         return formatTime(new Date(log))
       })
@@ -19,11 +19,11 @@ export default class Logs extends Page {
 
   render() {
     return (
-      <view class="container log-list">
-        <block for={logs} for-item="log">
-          <text class="log-item">{index + 1}. {log}</text>
-        </block>
-      </view>
+      <View className="container log-list">
+        <Block for={logs} for-item="log">
+          <Text className="log-item">{index + 1}. {log}</Text>
+        </Block>
+      </View>
     )
   }
 }

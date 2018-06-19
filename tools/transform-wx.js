@@ -88,25 +88,28 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                     t.jSXIdentifier('template')
                 )
             }
+
+            path.node.name.name = path.node.name.name.toLowerCase()
             //过滤条件标签
-            if (path.node.name.name === 'if' || path.node.name.name === 'elif') {
-                const result = path.node.attributes.find(x => x.name.name === 'condition')
-                const condition = generate(result.value, { concise: true }).code; //提取条件中的condition
-                const subResult = path.parent.children.find(x => x.type === 'JSXElement') //提取
-                subResult.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`${path.node.name.name}`), t.StringLiteral(`{${condition}}`))))
-                path.parent.openingElement = ''
-            } else if (path.node.name.name === 'else') {
-                const subResult = path.parent.children.find(x => x.type === 'JSXElement') //提取
-                subResult.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`${path.node.name.name}`))))
-                path.parent.openingElement = ''
-            }
+            /*             if (path.node.name.name === 'if' || path.node.name.name === 'elif') {
+                            const result = path.node.attributes.find(x => x.name.name === 'condition')
+                            const condition = generate(result.value, { concise: true }).code; //提取条件中的condition
+                            const subResult = path.parent.children.find(x => x.type === 'JSXElement') //提取
+                            subResult.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`${path.node.name.name}`), t.StringLiteral(`{${condition}}`))))
+                            path.parent.openingElement = ''
+                        } else if (path.node.name.name === 'else') {
+                            const subResult = path.parent.children.find(x => x.type === 'JSXElement') //提取
+                            subResult.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`${path.node.name.name}`))))
+                            path.parent.openingElement = ''
+                        } */
         },
         JSXClosingElement(path) {
-            if (path.node.name.name === 'if' || path.node.name.name === 'elif') {
-                path.parent.closingElement = ''
-            } else if (path.node.name.name === 'else') {
-                path.parent.openingElement = ''
-            }
+            path.node.name.name = path.node.name.name.toLowerCase()
+            /*             if (path.node.name.name === 'if' || path.node.name.name === 'elif') {
+                            path.parent.closingElement = ''
+                        } else if (path.node.name.name === 'else') {
+                            path.parent.openingElement = ''
+                        } */
         },
         JSXExpressionContainer(path) { //jsx容器表达式转义
             if (path.node.expression.type === 'ConditionalExpression') { //条件表达式
@@ -140,6 +143,8 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                 const valueNode = t.StringLiteral(value.expression.name)
                 path.replaceWith(t.jSXAttribute(nameNode, valueNode))
 
+            } else if (/className/.test(name.name)) {
+                path.node.name.name = `class`
             } else {
                 path.node.name.name = name.name
             }

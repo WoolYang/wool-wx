@@ -8,7 +8,7 @@ export default class Index extends App {
 
     onLaunch() {
         // 展示本地存储能力
-        var logs = wxx.getStorageSync('logs') || []
+        const logs = wxx.getStorageSync('logs') || []
         logs.unshift(Date.now())
         wxx.setStorageSync('logs', logs)
 
