@@ -72,9 +72,10 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                             const v = generate(x.value.expression, { concise: true }).code
                             if (x.value.expression.type === 'Identifier' && v === x.name.name) {
                                 all.push(`${v}`)
-                            } else if (x.value.expression.type === 'Identifier' && v !== x.name.name) {
+                            }/*  else if (x.value.expression.type === 'Identifier' && v !== x.name.name) {
                                 return all
-                            } else {
+                            }  */
+                            else {
                                 all.push(`${x.name.name}: ${v}`)
                             }
                         }
