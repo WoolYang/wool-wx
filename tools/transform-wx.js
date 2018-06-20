@@ -33,7 +33,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
     const Properties = {} //收集组件属性/默认值
     const ComponentRelations = {} //收集组件关联
     const JSONAttrs = {} //收集json
-    const output = { type: 'bundle', error: '' }
+    const output = { type: 'bundle', error: '', errorLine: '', errorCode: '' }
 
     const isTemplate = function () {
         return output.type === 'template'
@@ -58,6 +58,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
     const visitJSX = {
         JSXOpeningElement(path) { //jsx标签转义
             //template标签转义
+
             if (ImportTemplates[path.node.name.name]) {
                 const templateName = path.node.name.name
                 path.node.name.name = 'template'
@@ -76,9 +77,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                             const v = generate(x.value.expression, { concise: true }).code
                             if (x.value.expression.type === 'Identifier' && v === x.name.name) {
                                 all.push(`${v}`)
-                            }/*  else if (x.value.expression.type === 'Identifier' && v !== x.name.name) {
-                                return all
-                            }  */
+                            }
                             else {
                                 all.push(`${x.name.name}: ${v}`)
                             }
@@ -98,28 +97,10 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                     t.jSXIdentifier('template')
                 )
             }
-
             path.node.name.name = path.node.name.name.toLowerCase()
-            //过滤条件标签
-            /*             if (path.node.name.name === 'if' || path.node.name.name === 'elif') {
-                            const result = path.node.attributes.find(x => x.name.name === 'condition')
-                            const condition = generate(result.value, { concise: true }).code; //提取条件中的condition
-                            const subResult = path.parent.children.find(x => x.type === 'JSXElement') //提取
-                            subResult.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`${path.node.name.name}`), t.StringLiteral(`{${condition}}`))))
-                            path.parent.openingElement = ''
-                        } else if (path.node.name.name === 'else') {
-                            const subResult = path.parent.children.find(x => x.type === 'JSXElement') //提取
-                            subResult.openingElement.attributes.unshift(('body', t.jSXAttribute(t.JSXIdentifier(`${path.node.name.name}`))))
-                            path.parent.openingElement = ''
-                        } */
         },
         JSXClosingElement(path) {
             path.node.name.name = path.node.name.name.toLowerCase()
-            /*             if (path.node.name.name === 'if' || path.node.name.name === 'elif') {
-                            path.parent.closingElement = ''
-                        } else if (path.node.name.name === 'else') {
-                            path.parent.openingElement = ''
-                        } */
         },
         JSXExpressionContainer(path) { //jsx容器表达式转义
             if (path.node.expression.type === 'ConditionalExpression') { //条件表达式
@@ -153,6 +134,8 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                 const valueNode = t.StringLiteral(value.expression.name)
                 path.replaceWith(t.jSXAttribute(nameNode, valueNode))
 
+            } else if (/class$/.test(name.name)) {
+                handleError('请使用className替代class！', name)
             } else if (/className/.test(name.name)) {
                 path.node.name.name = `class`
             } else {
@@ -310,8 +293,6 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                 //标识页面类型
                 if (superClass && /App|Page|Component/.test(superClass.name)) {
                     output.type = superClass.name.toLowerCase()
-                } else if (superClass && !/App|Page|Component/.test(superClass.name)) {
-                    handleError(`不存在的页面类型${superClass.name}！`, superClass)
                 }
             },
             exit(path) {
@@ -389,6 +370,8 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                             t.objectExpression(Attrs)
                         ])
                     )
+                } else if (superClass && !/App|Page|Component/.test(superClass.name)) {
+                    handleError(`不存在的页面类型${superClass.name}！`, superClass)
                 }
             }
         },

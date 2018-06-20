@@ -20,7 +20,7 @@ export default class Logs extends Page {
   render() {
     return (
       <View className="container log-list">
-        <Log data={logs} />
+        <Log logs={logs} />
       </View>
     )
   }

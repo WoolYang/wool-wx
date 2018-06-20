@@ -39,7 +39,6 @@ function buildwx(bundle) {
 }
 
 function generator(id, modules, transformedModules, paths, referenced) {
-    //console.log(id)
     const { depended, code } = modules[id] //主bundle code 依赖
     if (depended.length) {
         depended.reduce((transformedModules, id) => generator(id, modules, transformedModules, paths, referenced), transformedModules) //递归处理主模块依赖模块
