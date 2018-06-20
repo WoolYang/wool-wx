@@ -1,14 +1,14 @@
 const app = getApp()
-
+import Header from '../../components/header/Header.js'
 export default class Index extends Page {
 
     constructor() {
         super()
         this.state = {
-            motto: 'Hello World!',
+            motto: 'Hello World!!',
             userInfo: {},
             hasUserInfo: false,
-            canIUse: wx.canIUse('button.open-type.getUserInfo')
+            canIUse: wx.canIUse('button.open-type.getUserInfo'),
         }
     }
 
@@ -67,6 +67,9 @@ export default class Index extends Page {
                 </View>
                 <View className="usermotto">
                     <Text className="user-motto">{motto}</Text>
+                    <Header>
+                        <View>这里是插入到组件slot中的内容</View>
+                    </Header>
                 </View>
             </View>
         )

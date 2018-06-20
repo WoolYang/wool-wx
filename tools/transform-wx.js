@@ -253,9 +253,11 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                     }
                 } else if (methodName === 'constructor') {
                     const data = path.node.body.body.find(
-                        x => x.expression.left && x.expression.left.property.name === 'data'
+                        x => x.expression && x.expression.left && x.expression.left.property.name === 'data'
                     )
-                    Attrs.push(t.objectProperty(t.identifier('data'), data.expression.right))
+                    if (data) {
+                        Attrs.push(t.objectProperty(t.identifier('data'), data.expression.right))
+                    }
                 } else if (/created|attached|ready|moved|detached/.test(methodName)) { //自定义组件生命周期
                     if (!isComponent()) return
                     const fn = t.objectProperty(
@@ -430,7 +432,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
             plugins: [
                 "transform-class-properties", "transform-object-rest-spread", "transform-es2015-modules-commonjs"
             ],
-        }).code.replace("'use strict';\n\n", '')
+        }).code.replace('"use strict";\n\n', '')
     return output
 
 }
