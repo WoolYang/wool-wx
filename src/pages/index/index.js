@@ -1,5 +1,5 @@
 const app = getApp()
-import Header from '../../components/header/Header.js'
+import ComponentDemo from '../../components/componentdemo/ComponentDemo.js'
 export default class Index extends Page {
 
     constructor() {
@@ -59,7 +59,7 @@ export default class Index extends Page {
         return (
             <View className="container">
                 <View className="userinfo">
-                    <Button if={!hasUserInfo && canIUse} open-type="getUserInfo" onGetuserinfo={getUserInfo}> 获取头像昵称 </Button>
+                    <Button if={!hasUserInfo && canIUse} open-type="getUserInfo" onGetuserinfo={getUserInfo}>获取头像昵称</Button>
                     <Block else>
                         <Image onTap={bindViewTap} className="userinfo-avatar" src={userInfo.avatarUrl} mode="cover"></Image>
                         <Text className="userinfo-nickname">{userInfo.nickName}</Text>
@@ -67,9 +67,9 @@ export default class Index extends Page {
                 </View>
                 <View className="usermotto">
                     <Text className="user-motto">{motto}</Text>
-                    <Header>
+                    <ComponentDemo>
                         <View>这里是插入到组件slot中的内容</View>
-                    </Header>
+                    </ComponentDemo>
                 </View>
             </View>
         )

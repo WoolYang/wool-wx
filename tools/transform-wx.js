@@ -234,7 +234,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
 
                 if (methodName === 'render') {
                     if (path.node.body.body.length > 1) {
-                        console.error('render 方法只能 return !')
+                        handleError(`'render 方法只能 return !'`, path.node.key)
                     }
                     return
                 }

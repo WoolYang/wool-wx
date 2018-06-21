@@ -1,5 +1,5 @@
 {
     "usingComponents": {
-        "my-component": "/components/header/Header"
+        "ComponentDemo": "/components/componentdemo/ComponentDemo"
     }
 }

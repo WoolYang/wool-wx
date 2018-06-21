@@ -1,4 +1,4 @@
-export default class Header extends Component {
+export default class ComponentDemo extends Component {
     constructor() {
         super()
         this.state = {
@@ -12,7 +12,7 @@ export default class Header extends Component {
 
     render() {
         return (
-            <View className="header">
+            <View>
                 <Slot></Slot>
             </View>
         )
