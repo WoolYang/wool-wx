@@ -38,7 +38,7 @@ function lessTask(done) {
 function copyFileTask(done) {
     gulp.src([
         'src/*.json',
-        'src/**/*/*.json',
+        'src/**/*/*.json'
     ])
         .pipe(changed('./dist'))
         .pipe(gulp.dest('./dist'))
@@ -48,8 +48,8 @@ function copyFileTask(done) {
 function copyAPIFileTask(done) {
     gulp.src([
         'src/apis/*.js'
-    ])
-        .pipe(gulp.dest('./dist/apis'))
+    ], { base: '.' })
+        .pipe(gulp.dest('./dist'))
         .on('finish', done);
 }
 

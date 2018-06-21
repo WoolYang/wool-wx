@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "gulp",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "npm test -- --watch",
+    "test:cov": "npm test -- --coverage",
+    "codecov": "codecov"
   },
   "author": "wool",
   "license": "MIT",
@@ -23,6 +26,7 @@
     "babel-types": "^6.26.0",
     "babylon": "^6.18.0",
     "chalk": "^2.4.1",
+    "codecov": "^3.0.2",
     "gulp": "^3.9.1",
     "gulp-babel": "^7.0.1",
     "gulp-changed": "^3.2.0",
@@ -30,10 +34,17 @@
     "gulp-less": "^3.5.0",
     "gulp-rename": "^1.2.3",
     "gulp-rollup": "^2.16.2",
+    "jest": "^23.1.0",
     "mkdirp": "^0.5.1",
     "prettify-xml": "^1.2.0",
     "rimraf": "^2.6.2",
     "rollup": "^0.60.2",
     "rollup-plugin-babel": "^3.0.4"
+  },
+  "jest": {
+    "testRegex": "(/test/.*\\.spec.js)$",
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/test/helpers/"
+    ]
   }
 }
