@@ -14,10 +14,10 @@ react语法糖转化为原生微信小程序
 ## 使用
     在src目录中书写代码，保存后自动化编译于dist目录，使用微信开发者工具打开dist目录并调试
 ### 1.规则
-    注册程序，页面，组件分别继承自父类 APP，Page，Component
+    注册程序，页面，组件分别继承自父类 App，Page，Component
 ```js
     //注册程序
-    export default class Index extends APP {}
+    export default class Index extends App {}
     //页面
     export default class Index extends Page {}
     //组件
@@ -161,7 +161,7 @@ react语法糖转化为原生微信小程序
 ### 10.json文件处理
     json在目录对应层级下按照官方书写，编译时只做拷贝
 
-### 11.api使用
+### 11.API使用
     带有success，fail属性API按照promise方式书写，其余API按官方书写，API方法封装于wxx对象中，直接调用
 ```js
     wxx.login().then(res => {
