@@ -1,4 +1,10 @@
 # wool-wx
+
+<p align="center">
+<a href="https://travis-ci.org/WoolYang/wool-wx">
+  <img src="https://travis-ci.org/WoolYang/wool-wx.svg?branch=master" alt="Travis CI Status"/></a>
+</p> 
+
 react语法糖转化为原生微信小程序
 
 ## 安装
