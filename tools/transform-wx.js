@@ -3,7 +3,7 @@ const fs = require('fs')
 const _path = require('path');
 const babylon = require('babylon') //用于解析代码生产AST
 const traverse = require('babel-traverse').default //用于遍历AST合成新的AST
-const t = require('babel-types') //用于访问AST
+const t = require('babel-types') //用于创建AST节点
 const generate = require('babel-generator').default //用于AST生产代码
 const babel = require('babel-core')
 
@@ -170,7 +170,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
         Program: {
             exit(path) {
                 //自动注入api
-                if (isComponent() || isPage() || isApp()) {
+                if (id && (isComponent() || isPage() || isApp())) {
                     const relativeWX = _path.relative(_path.parse(id).dir, _path.join(sourcePath, 'apis', 'wx.js')).split('\\').join('/')
                     const dest = isApp() ? './' + relativeWX : relativeWX
                     path.node.body.unshift(
@@ -430,7 +430,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
             plugins: [
                 "transform-class-properties", "transform-object-rest-spread", "transform-es2015-modules-commonjs"
             ],
-        }).code.replace("'use strict';\n\n", '')
+        }).code.replace('"use strict";\n\n', '')
     return output
 
 }
