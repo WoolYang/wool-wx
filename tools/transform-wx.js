@@ -134,7 +134,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                 const valueNode = t.StringLiteral(value.expression.name)
                 path.replaceWith(t.jSXAttribute(nameNode, valueNode))
 
-            } else if (/class$/.test(name.name)) {
+            } else if (/^class$/.test(name.name)) {
                 handleError('请使用className替代class！', name)
             } else if (/className/.test(name.name)) {
                 path.node.name.name = `class`
@@ -153,9 +153,9 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                 path.node.value = t.stringLiteral(
                     zip([
                         value.expression.quasis.map(x => x.value.raw),
-                        value.expression.expressions.map(x => x.name)
+                        value.expression.expressions.map(x => t.identifier(`{${generate(x).code}}`).name)
                     ]).reduce((v, [raw, name]) => {
-                        return !raw && !name ? v : name ? v + `${raw}{{${name}}}` : v + raw
+                        return !raw && !name ? v : name ? v + `${raw}{${name}}` : v + raw
                     }, '')
                 )
             } else if (/^bind:(\w*)|^on(\w*)$/.test(name.name)) { //on bind事件字符串替换，替换后原on节点依旧存在，待优化
@@ -255,9 +255,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
                     const data = path.node.body.body.find(
                         x => x.expression && x.expression.left && x.expression.left.property.name === 'data'
                     )
-                    if (data) {
-                        Attrs.push(t.objectProperty(t.identifier('data'), data.expression.right))
-                    }
+                    data && Attrs.push(t.objectProperty(t.identifier('data'), data.expression.right))
                 } else if (/created|attached|ready|moved|detached/.test(methodName)) { //自定义组件生命周期
                     if (!isComponent()) return
                     const fn = t.objectProperty(
@@ -432,7 +430,7 @@ const transform = ({ id, code, dependedModules = {}, referencedBy = [], sourcePa
             plugins: [
                 "transform-class-properties", "transform-object-rest-spread", "transform-es2015-modules-commonjs"
             ],
-        }).code.replace('"use strict";\n\n', '')
+        }).code.replace("'use strict';\n\n", '')
     return output
 
 }
