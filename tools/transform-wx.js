@@ -9,6 +9,15 @@ const babel = require('babel-core')
 
 const prettifyXml = require('prettify-xml')
 
+//类型
+const propTypes = {
+    string: 'String',
+    number: 'Number',
+    bool: 'Boolean',
+    object: 'Object',
+    array: 'Array',
+}
+
 //数组合并，类似python zip
 const zip = arrays => {
     let shortest = arrays.length == 0 ? [] : arrays.reduce((a, b) => a.length < b.length ? a : b);

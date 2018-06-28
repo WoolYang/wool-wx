@@ -1,5 +1,5 @@
 {
     "usingComponents": {
-        "ComponentDemo": "/components/componentdemo/ComponentDemo"
+        "componentdemo": "/components/componentdemo/ComponentDemo"
     }
 }

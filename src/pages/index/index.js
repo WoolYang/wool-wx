@@ -5,7 +5,8 @@ export default class Index extends Page {
     constructor() {
         super()
         this.state = {
-            motto: 'Hello World!!',
+            motto: '传入值',
+            motto1: '传入值外',
             userInfo: {},
             hasUserInfo: false,
             canIUse: wx.canIUse('button.open-type.getUserInfo'),
@@ -55,6 +56,10 @@ export default class Index extends Page {
         })
     }
 
+    change(e) {
+        this.setState({ motto1: '我被emit改变了' })
+    }
+
     render() {
         return (
             <View className="container">
@@ -66,9 +71,10 @@ export default class Index extends Page {
                     </Block>
                 </View>
                 <View className="usermotto">
-                    <Text className="user-motto">{motto}</Text>
-                    <ComponentDemo>
-                        <View>这里是插入到组件slot中的内容</View>
+                    <View>我是在父组件访问传入值：{motto}</View>
+                    <View>我是在父组件访问传入值：{motto1}</View>
+                    <ComponentDemo a={motto} c={motto1} onTap={change} >
+                        <View>我是插入到组件slot中的内容</View>
                     </ComponentDemo>
                 </View>
             </View>
